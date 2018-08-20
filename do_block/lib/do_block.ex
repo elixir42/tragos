@@ -46,22 +46,37 @@ defmodule DoBlock do
   @doc """
   Dump keyword arguments.
 
-  ## Examples
+  ## `do` Examples
 
-      iex> DoBlock.dumpMacro do: 1
-      [do: 1]
-      iex> DoBlock.dumpMacro do
+      iex> DoBlock.dumpMacro :doit, do: 1
+      [did: 1]
+      iex> DoBlock.dumpMacro :dont, do: 1
+      [didnot: "1"]
+      iex> DoBlock.dumpMacro :doit, do: DoBlock.hello()
+      [did: :world]
+      iex> DoBlock.dumpMacro :dont, do: DoBlock.hello()
+      [didnot: "{{:., [line: 51], [{:__aliases__, [line: 51], [:DoBlock]}, :hello]}, [line: 51], []}"]
+      iex> DoBlock.dumpMacro :doit do
       ...>   DoBlock.hello()
       ...> end
-      [do: :world]
+      [did: :world]
+      iex> DoBlock.dumpMacro :dont do
+      ...>   DoBlock.hello()
+      ...> end
+      [didnot: "{{:., [line: 52], [{:__aliases__, [line: 52], [:DoBlock]}, :hello]}, [line: 52], []}"]
+
   """
-  defmacro dumpMacro(do: bloco) do
+  defmacro dumpMacro(:doit, do: bloco) do
     quote do
-      [do: unquote bloco]
+      [did: unquote bloco]
     end
   end
 
-
+  defmacro dumpMacro(:dont, do: bloco) do
+    quote do
+      [didnot: unquote(inspect(bloco))]
+    end
+  end
 
   def hello do
     :world
